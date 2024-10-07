@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5C60D164-E58D-40B0-9937-00AEBE2E2ED5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>APAS.Plugin.LiZhun.ForceSensor.MultiAxis</RootNamespace>
+    <AssemblyName>APAS.Plugin.LiZhun.ForceSensor.MultiAxis</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_GEN_FAKE_DATA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32bit>false</Prefer32bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32bit>false</Prefer32bit>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="APAS.CoreLib">
+      <HintPath>Dependencies\APAS.CoreLib.dll</HintPath>
+    </Reference>
+    <Reference Include="APAS.Plugin.Sdk">
+      <HintPath>Dependencies\APAS.Plugin.Sdk.dll</HintPath>
+    </Reference>
+    <Reference Include="APAS.ServiceContract">
+      <HintPath>Dependencies\APAS.ServiceContract.dll</HintPath>
+    </Reference>
+    <Reference Include="NModbus4">
+      <HintPath>Dependencies\NModbus4.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Converters\ReverseBoolConverter.cs" />
+    <Compile Include="Extensions\GenericTypeConverter.cs" />
+    <Compile Include="PluginImpl.cs" />
+    <Compile Include="RelayCommand.cs" />
+    <Compile Include="Views\PluginView.xaml.cs">
+      <DependentUpon>PluginView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\BlinkingIndicator.xaml.cs">
+      <DependentUpon>BlinkingIndicator.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Readme.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\BlinkingIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PluginView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\keithley_logo.png" />
+    <Content Include="Dependencies\APAS.CoreLib.dll" />
+    <Content Include="Dependencies\APAS.Plugin.Sdk.dll" />
+    <Content Include="Dependencies\APAS.ServiceContract.dll" />
+    <Content Include="Dependencies\NModbus4.dll" />
+    <Content Include="Resources\MainFrame.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
