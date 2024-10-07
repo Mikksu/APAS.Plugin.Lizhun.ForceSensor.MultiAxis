@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Configuration;
 using System.IO.Ports;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +9,7 @@ using APAS.Plugin.LiZhun.ForceSensor.MultiAxis.Views;
 using APAS.Plugin.Sdk.Base;
 using APAS.ServiceContract.Wcf;
 using Modbus.Device;
+using ReportFrame = (double force1, double force2, double force3, double force4);
 
 namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
 {
@@ -19,7 +18,7 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
     {
         #region Variables
 
-        private const int MAX_CH = 3;
+        private const int MAX_CH = 4;
         
         private IModbusSerialMaster _modbusMaster;
         private SerialPort _serialPort;
@@ -37,20 +36,25 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
         /// <summary>
         /// 起始寄存器地址
         /// </summary>
-        private int _regStart;
+        private int _regForce1;
+        private int _regForce2;
+        private int _regForce3;
+        private int _regForce4;
+        private int[] _regForces;
 
         private Task _bgTask;
         private CancellationTokenSource _cts;
         private CancellationToken _ct;
         private bool _isInit;
-        private readonly IProgress<(double force1, double force2, double force3)> _rtValuesUpdatedReporter;
+        private readonly IProgress<ReportFrame> _rtValuesUpdatedReporter;
         
         #endregion
 
         #region Constructors
 
         public PluginImpl(ISystemService apasService, string caption) 
-            : base(Assembly.GetExecutingAssembly(), apasService, caption, MAX_CH, new[] {"CH1", "CH2", "CH3" })
+            : base(Assembly.GetExecutingAssembly(), apasService, caption,
+                MAX_CH, new[] {"CH1", "CH2", "CH3", "CH4" })
         {
             var config = GetAppConfig();
             LoadConfigItem(config, "ReadIntervalMillisec", out _pollingIntervalMs, 200);
@@ -64,12 +68,13 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
 
             //! the progress MUST BE defined in the ctor since
             //! we operate the UI elements in the OnCommOneShot event.
-            _rtValuesUpdatedReporter = new Progress<(double force1, double force2, double force3)>(values =>
+            _rtValuesUpdatedReporter = new Progress<ReportFrame>(values =>
             {
                 Force1 = values.force1;
                 Force2 = values.force2;
                 Force3 = values.force3;
-                
+                Force4 = values.force4;
+
             });
         }
 
@@ -116,6 +121,13 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
             private set => SetProperty(ref _force3, value);
         }
        
+        private double _force4;
+
+        public double Force4
+        {
+            get => _force4;
+            private set => SetProperty(ref _force4, value);
+        }
         #endregion
 
         #region Methods
@@ -149,21 +161,26 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
         {
             if (channel >= 0 && channel < MaxChannel)
             {
-                var result = FetchAll();
-                return result[channel];
+                var data = _modbusMaster.ReadHoldingRegisters((byte)_slaveId, (ushort)_regForces[channel], 1);
+                var force = (int)data[0] / 100.0;
+                return force;
             }
-
-            throw new ArgumentOutOfRangeException(nameof(channel));
+            else
+                throw new ArgumentOutOfRangeException(nameof(channel), $"通道编号需在0~{MaxChannel - 1}之间。");
         }
 
         public override object[] FetchAll()
         {
-            var data = _modbusMaster.ReadHoldingRegisters((byte)_slaveId, (ushort)_regStart, 6);
-            var force1 = ConvertUShortToFloat(new[] { data[0], data[1] });
-            var force2 = ConvertUShortToFloat(new[] { data[2], data[3] });
-            var force3 = ConvertUShortToFloat(new[] { data[4], data[5] });
-            _rtValuesUpdatedReporter.Report((force1, force2, force3));
-            return new object[] { force1, force2, force3 };
+            var data = _modbusMaster.ReadHoldingRegisters((byte)_slaveId, (ushort)_regForce1, 1);
+            var force1 = (short)data[0] / 100.0;
+            data = _modbusMaster.ReadHoldingRegisters((byte)_slaveId, (ushort)_regForce2, 1);
+            var force2 = (short)data[0] / 100.0;
+            data = _modbusMaster.ReadHoldingRegisters((byte)_slaveId, (ushort)_regForce3, 1);
+            var force3 = (short)data[0] / 100.0;
+            data = _modbusMaster.ReadHoldingRegisters((byte)_slaveId, (ushort)_regForce4, 1);
+            var force4 = (short)data[0] / 100.0;
+            _rtValuesUpdatedReporter.Report((force1, force2, force3, force4));
+            return new object[] { force1, force2, force3, force4 };
         }
 
         public override object Fetch()
@@ -225,9 +242,15 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
             LoadConfigItem(config, "Port", out var port, "COM1");
             LoadConfigItem(config, "BaudRate", out var baudRate, 9600);
             LoadConfigItem(config, "SlaveId", out _slaveId, 1);
-            LoadConfigItem(config, "RegStart", out _regStart, 256);
-            
+            LoadConfigItem(config, "RegForce1", out _regForce1, 0x50);
+            LoadConfigItem(config, "RegForce2", out _regForce2, 0x244);
+            LoadConfigItem(config, "RegForce3", out _regForce3, 0x438);
+            LoadConfigItem(config, "RegForce4", out _regForce4, 0x62C);
+
+            _regForces = new[] { _regForce1, _regForce2, _regForce3, _regForce4 };
+
             _serialPort = new SerialPort(port, baudRate, Parity.None, 8, StopBits.One);
+            _serialPort.Open();
             _modbusMaster = ModbusSerialMaster.CreateRtu(_serialPort);
             _modbusMaster.Transport.ReadTimeout = 100;
             _modbusMaster.Transport.WriteTimeout = 100;
@@ -262,7 +285,7 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
             return result;
         }
         
-        private void _startBackgroundTask(IProgress<(double force1, double force2, double force3)> progress = null)
+        private void _startBackgroundTask(IProgress<ReportFrame> progress = null)
         {
             if (_bgTask == null || _bgTask.IsCompleted)
             {

@@ -34,7 +34,6 @@
                 </Grid.ColumnDefinitions>
                 <Image Source="/APAS.Plugin.KEYTHLEY._2600;component/Resources/keithley_logo.png"
                         VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="5,3,0,5"/>
-                <views:BlinkingIndicator x:Name="blinkIndicator" Height="3" Width="3" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
 
                 <StackPanel Grid.Column="1" >
                     <TextBlock Text="压力传感器" Foreground="White"
@@ -78,18 +77,21 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="通道1"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Force1, Mode=OneWay, StringFormat={}{0:F3}}" />
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="通道2"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Force2, Mode=OneWay, StringFormat={}{0:F3}}" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="通道3"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Force3, Mode=OneWay, StringFormat={}{0:F3}}" />
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="通道1 (kg)"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Force1, Mode=OneWay, StringFormat={}{0:F2}}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="通道2 (kg)"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Force2, Mode=OneWay, StringFormat={}{0:F2}}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="通道3 (kg)"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Force3, Mode=OneWay, StringFormat={}{0:F2}}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="通道4 (kg)"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Force4, Mode=OneWay, StringFormat={}{0:F2}}" />
         </Grid>
 
     </Grid>

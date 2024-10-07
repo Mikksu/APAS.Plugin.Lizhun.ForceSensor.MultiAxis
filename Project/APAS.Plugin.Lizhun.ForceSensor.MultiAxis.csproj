@@ -25,6 +25,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <Prefer32bit>false</Prefer32bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32bit>false</Prefer32bit>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="APAS.CoreLib">
