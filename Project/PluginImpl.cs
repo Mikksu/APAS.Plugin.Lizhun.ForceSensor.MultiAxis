@@ -42,6 +42,12 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
         private int _regForce4;
         private int[] _regForces;
 
+        private int _regZeroForce1;
+        private int _regZeroForce2;
+        private int _regZeroForce3;
+        private int _regZeroForce4;
+        private int[] _regZeroForces;
+
         private Task _bgTask;
         private CancellationTokenSource _cts;
         private CancellationToken _ct;
@@ -246,8 +252,13 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
             LoadConfigItem(config, "RegForce2", out _regForce2, 0x244);
             LoadConfigItem(config, "RegForce3", out _regForce3, 0x438);
             LoadConfigItem(config, "RegForce4", out _regForce4, 0x62C);
-
             _regForces = new[] { _regForce1, _regForce2, _regForce3, _regForce4 };
+
+            LoadConfigItem(config, "RegZeroForce1", out _regZeroForce1, 0x50);
+            LoadConfigItem(config, "RegZeroForce2", out _regZeroForce2, 0x244);
+            LoadConfigItem(config, "RegZeroForce3", out _regZeroForce3, 0x438);
+            LoadConfigItem(config, "RegZeroForce4", out _regZeroForce4, 0x62C);
+            _regZeroForces = new[] { _regZeroForce1, _regZeroForce2, _regZeroForce3, _regZeroForce4 };
 
             _serialPort = new SerialPort(port, baudRate, Parity.None, 8, StopBits.One);
             _serialPort.Open();
@@ -333,6 +344,8 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
                 _bgTask = null;
             }
 
+            Dispose();
+
             IsInitialized = false;
             IsEnabled = false;
         }
@@ -342,7 +355,7 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
         #region Commands
 
         /// <summary>
-        /// Re-connect to the keithley 2602B
+        /// 重新连接。
         /// </summary>
         public RelayCommand ReConnCommand
         {
@@ -357,13 +370,34 @@ namespace APAS.Plugin.LiZhun.ForceSensor.MultiAxis
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"无法连接2606B，{ex.Message}", "错误",
+                        MessageBox.Show($"无法连接压力传感器，{ex.Message}", "错误",
                             MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 });
             }
         }
-        
+
+        /// <summary>
+        /// 压力值清零。
+        /// </summary>
+        public RelayCommand ZeroForceCommand =>
+            new RelayCommand(ch =>
+            {
+                try
+                {
+                    if(!int.TryParse(ch.ToString(), out var i))
+                        MessageBox.Show($"通道数错误。", "错误",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    else
+                        _modbusMaster.WriteMultipleRegisters((byte)_slaveId, (ushort)_regZeroForces[i], [0x0]);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"无法清零，{ex.Message}", "错误",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            });
+
         #endregion
     }
 }
